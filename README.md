@@ -3,6 +3,21 @@
 PX4/NuttX application to activate offboard control mode and control the 
 drone internaly.
 
+## Requirements 
+- summon-arm-toolchain or PX4 toolchain 
+- PX4 Firmware
+- Simulation Dependencies
+
+## Setup
+To setup all the requirements, follow this [guide](https://github.com/MHageH/c_uart_interface).
+
+First download the PX4 firmware :
+```
+git clone https://github.com/PX4/Firmware.git
+cd Firmware;
+git submodule update --init --recursive
+```
+
 Place the content of this git in Firmware/src/examples/mcontrol
 
 Then add this line to Firmware/cmake/configs/posix_sitl_default.cmake
@@ -31,5 +46,6 @@ The virtual drone should take position now.
 You can mode the start() function to change the required setpoints.
 
 # TODO 
-- add pthreads
-
+- Add pthreads
+- Test on the real drone
+- Add higher level commands 
