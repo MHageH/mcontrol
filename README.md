@@ -43,7 +43,7 @@ mcontrol
 
 The virtual drone should take position now.
 
-You can mode the start() function to change the required setpoints.
+You can mod the start() function to change the required setpoints.
 
 # TODO 
 - Add pthreads
