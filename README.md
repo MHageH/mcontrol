@@ -47,5 +47,9 @@ You can mod the start() function to change the required setpoints.
 
 # TODO 
 - Add pthreads
+- Add initial position
+- Reduce memory consumption
+- Probably change architecture to daemon application
+- Give back control to auto mode on sequence completion
 - Test on the real drone
 - Add higher level commands 
