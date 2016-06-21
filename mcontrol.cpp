@@ -1,50 +1,3 @@
-/****************************************************************************
- *
- *   Copyright (c) 2012-2015 PX4 Development Team. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name PX4 nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************/
-
-/**
- * @file mcontrol.cpp
- * 
- * 
- * @author Lorenz Meier <lorenz@px4.io>
- * @author Anton Babushkin <anton@px4.io>
- * @author Thomas Gubler <thomas@px4.io>
- *
- * This was largely inspired from mavlink_receive.cpp
- * Modification made by Mohamed Hage Hassan <mohamed.hagehassan@yahoo.com>
- *
- */
-
-
 #include <px4_config.h>
 #include <px4_time.h>
 #include <px4_tasks.h>
@@ -86,6 +39,9 @@
 #include <geo/geo.h>
 
 #include "mcontrol.h"
+
+// Allow PX4_INFO
+#define PX4_WARNINGS
 
 extern "C" {
 	__EXPORT int mcontrol_main(int argc, char * argv[]);
@@ -184,7 +140,9 @@ void MControl::activate_offboard_control_mode( bool flag ){
 	}
 
 void MControl::set_position (float x, float y, float z){
-	PX4_INFO("Setting position to [ %f, %f, %f ]", (double)x, (double)y,(double)z);
+	#ifdef PX4_WARNINGS
+		PX4_INFO("Setting position to [ %f, %f, %f ]", (double)x, (double)y,(double)z);
+	#endif 
 
 	struct offboard_control_mode_s offboard_control_mode = {};
 
@@ -193,7 +151,9 @@ void MControl::set_position (float x, float y, float z){
 		PX4_ISFINITE(y) && 
 		PX4_ISFINITE(z);
 
-		PX4_INFO("Values finite : %d", values_finite);
+		#ifdef PX4_WARNINGS
+			PX4_INFO("Values finite : %d", values_finite);
+		#endif
 
 		if(values_finite){
 
@@ -223,15 +183,19 @@ void MControl::set_position (float x, float y, float z){
 			bool updated;
 			orb_check(_control_mode_sub, &updated);
 
-			PX4_INFO("updated value : %d", updated);
+			#ifdef PX4_WARNINGS
+				PX4_INFO("updated value : %d", updated);
+			#endif
 
 			if (updated) {
 				orb_copy(ORB_ID(vehicle_control_mode), _control_mode_sub, &_control_mode);
 			}
 
-			PX4_INFO("offboard_control_flag status : %d", _control_mode.flag_control_offboard_enabled);
+			#ifdef PX4_WARNINGS
+				PX4_INFO("offboard_control_flag status : %d", _control_mode.flag_control_offboard_enabled);
+			#endif
 
-			if (_control_mode.flag_control_offboard_enabled == 0) {
+			if (_control_mode.flag_control_offboard_enabled) {
 				if (is_force_sp && offboard_control_mode.ignore_position &&
 				    offboard_control_mode.ignore_velocity) {
 					/* The offboard setpoint is a force setpoint only, directly writing to the force
@@ -273,42 +237,36 @@ void MControl::set_position (float x, float y, float z){
 						pos_sp_triplet.current.position_valid = false;
 					}
 
-					/* set the local vel values */
 					if (!offboard_control_mode.ignore_velocity) {
 						// NULL
-					} else {
+						} else {
 						// NULL
-					}
+						}
 
-					/* set the local acceleration values if the setpoint type is 'local pos' and none
-					 * of the accelerations fields is set to 'ignore' */
 					if (!offboard_control_mode.ignore_acceleration_force) {
 						// NULL
-					} else {
+						} else {
 						// NULL
-					}
+						}
 
-					/* set the yaw sp value */
 					if (!offboard_control_mode.ignore_attitude) {
 						// NULL
-					} else {
+						} else {
 						// NULL
-					}
+						}
 
-					/* set the yawrate sp value */
 					if (!offboard_control_mode.ignore_bodyrate) {
 						// NULL
-					} else {
+						} else {
 						// NULL
-					}
-
-					//XXX handle global pos setpoints (different MAV frames)
+						}
 
 					if (_pos_sp_triplet_pub == nullptr) {
 						_pos_sp_triplet_pub = orb_advertise(ORB_ID(position_setpoint_triplet), &pos_sp_triplet);
 
 					} else {
 						orb_publish(ORB_ID(position_setpoint_triplet), _pos_sp_triplet_pub, &pos_sp_triplet);
+						//_pos_sp_triplet_pub = nullptr;
 					}
 			}
 
@@ -321,8 +279,34 @@ int MControl::start (void){
 	PX4_INFO("Testing..");
 
 	activate_offboard_control_mode(true);
+
+	uint32_t count = 0;
+	uint8_t PC = 0;
+
 	while(1){
-		set_position(0,0, -10);
+		switch (PC) {
+			case 0 :
+						set_position(1, 0 , -5); 
+						usleep(100000);
+						break;
+			case 1 : 
+						set_position(1,0, -10);
+						usleep(100000);
+						break;
+			case 2 : 
+						set_position(1, 1, -5);
+						usleep(100000);
+						break;
+
+			default: break;
+		}
+			
+			count++;
+			if (count == 100){
+				count = 0;
+				PC++;
+				if (PC == 3) PC = 0;
+			}
 	}
 
 	return 0;
@@ -334,4 +318,4 @@ int mcontrol_main(int argc, char * argv[]){
 	OControl.start();
 
 	return 0;
-}
+	}
