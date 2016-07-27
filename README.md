@@ -3,6 +3,22 @@
 PX4/NuttX application to activate offboard control mode and control the 
 drone internaly.
 
+## Recent mods
+- Add pthreads
+- Reduce memory consumption
+- Changed architecture to daemon application
+- Added higher level commands 
+
+- Tested on the real drone
+
+## Capabilities
+- Ability to read from and write to drivers and other applications through uORB interprocesses  
+communication layer
+- Fully multithreaded
+- MAVLink protocol independant
+- Works internally on the pixhawk without any use of external calculator
+- High level functions
+
 ## Requirements 
 - summon-arm-toolchain or PX4 toolchain 
 - PX4 Firmware
@@ -46,10 +62,5 @@ The virtual drone should take position now.
 You can mod the start() function to change the required setpoints.
 
 # TODO 
-- Add pthreads
 - Add initial position
-- Reduce memory consumption
-- Probably change architecture to daemon application
 - Give back control to auto mode on sequence completion
-- Test on the real drone
-- Add higher level commands 

@@ -33,9 +33,12 @@
 px4_add_module(
 	MODULE examples__mcontrol
 	MAIN mcontrol
-	STACK_MAIN 2000
+	STACK_MAIN 4000
+	COMPILE_FLAGS
+		-lpthread
 	SRCS
 		mcontrol.cpp
+		thread_layer.cpp
 	DEPENDS
 		platforms__common
 	)
