@@ -4,18 +4,21 @@ PX4/NuttX application to activate offboard control mode and control the
 drone internaly.
 
 ## Recent mods
-- Add pthreads
+- Added pthreads
 - Reduce memory consumption
 - Changed architecture to daemon application
 - Added higher level commands 
+- Added initial position acquisation
+- Added get_local_position function
+- Give back control to auto mode on sequence completion
 
-- Tested on the real drone (needs initial position for real flight)
+- Tested on the real drone (needs real flight testing)
 
 ## Capabilities
 - Ability to read from and write to drivers and other applications through uORB interprocesses  
 communication layer
 - Fully multithreaded
-- MAVLink protocol independant
+- MAVLink protocol independent
 - Works internally on the pixhawk without any use of external calculator
 - High level functions
 
@@ -57,8 +60,7 @@ You can now activate the mode by :
 mcontrol
 ```
 
-The drone should take position in theory. It will behave incorrectly untill 
-the implementation of the initial position
+The drone should take position in theory, needs real flight testing.
 
 You can mod the MControl::start() function to change the required setpoints.
 
@@ -66,6 +68,7 @@ Note : This program can be added to simulation, but it won't work (will cause
 the application to crash)
 
 # TODO 
-- Add initial position
 - Add automatic arm/disarm
-- Give back control to auto mode on sequence completion
+
+## Notes
+- Disabling the -Werror=double-promotion flag in cmake/common/px4_base.cmake file might be necessary for now

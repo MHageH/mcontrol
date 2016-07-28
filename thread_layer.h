@@ -11,7 +11,6 @@
 #include <uORB/topics/vehicle_attitude.h>
 #include <uORB/topics/vehicle_gps_position.h>
 #include <uORB/topics/vehicle_global_position.h>
-#include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/vehicle_land_detected.h>
 #include <uORB/topics/home_position.h>
 #include <uORB/topics/vehicle_status.h>
@@ -44,6 +43,9 @@
 #include <px4_tasks.h>
 #include <px4_posix.h>
 #include <pthread.h>
+
+// Local position topic
+#include <uORB/topics/vehicle_local_position.h>
 
 // Read pthread helper function
 void * mcontrol_start_read_thread(void *);
@@ -79,6 +81,13 @@ class mcontrol_thread {
 		// Main initialisation function 
 		void start (void);
 
+		// Local Position related data structures
+		struct vehicle_local_position_s local_position__global = {};
+		struct vehicle_local_position_s initial_position = {};
+
+		// Local Position function 
+		void get_local_position(void);
+
 	private:
 
 		int MAV_CMD_NAV_GUIDED_ENABLE = 92;
@@ -96,6 +105,12 @@ class mcontrol_thread {
 
 		// Write thread
 		void write_thread(void);
+
+		// Local Position data structure
+		struct vehicle_local_position_s local_position = {};
+		
+		// Local Position initial position lock
+		bool initial_position_acquisation = false;
 
 
 		struct vehicle_local_position_s hil_local_pos;
@@ -135,7 +150,12 @@ class mcontrol_thread {
 		orb_advert_t _transponder_report_pub;
 
 		int _gps_inject_data_next_idx = 0;
+
+		// Offboard control mode subscription
 		int _control_mode_sub;
+
+		// Local position subscription
+		int _local_position_sub;
 
 		int _hil_frames;
 		uint64_t _old_timestamp;

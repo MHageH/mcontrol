@@ -37,6 +37,7 @@ mcontrol_thread::mcontrol_thread():
 	_follow_target_pub(nullptr),
 	_transponder_report_pub(nullptr),
 	_control_mode_sub(orb_subscribe(ORB_ID(vehicle_control_mode))),
+	_local_position_sub(orb_subscribe(ORB_ID(vehicle_local_position))),
 	_hil_frames(0),
 	_old_timestamp(0),
 	_hil_last_frame(0),
@@ -207,6 +208,30 @@ void mcontrol_thread::setpoint_(float x, float y, float z){
 	
 	}
 
+void mcontrol_thread::get_local_position(void){
+	bool updated = false;
+
+	orb_copy(ORB_ID(vehicle_local_position), _local_position_sub, &local_position);
+
+	/* update local position estimate */
+		orb_check(_local_position_sub, &updated);
+
+		if (updated) {
+			/* position changed */
+			orb_copy(ORB_ID(vehicle_local_position), _local_position_sub, &local_position);
+		}
+
+		if(!initial_position_acquisation){
+			initial_position.x = local_position.x; initial_position.y = local_position.y; initial_position.z = local_position.z;
+			initial_position_acquisation = true;
+
+			PX4_INFO("Initial position [ %f, %f, %f ]", initial_position.x, initial_position.y, initial_position.z);
+		} else {
+			PX4_INFO("Current position [ %f, %f, %f ]", local_position.x, local_position.y, local_position.z);
+		}
+
+		local_position__global.x = local_position.x; local_position__global.y = local_position.y; local_position__global.z = local_position.z;
+	}
 
 void mcontrol_thread::read_thread(void){
 

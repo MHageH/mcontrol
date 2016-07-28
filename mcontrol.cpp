@@ -70,17 +70,40 @@ int MControl::start (void){
 	PX4_INFO("Initialising read and write threads");
 	control.start();
 
+	PX4_INFO("Getting initial local position");
+	control.get_local_position();
+
 	PX4_INFO("Activating offboard control mode");
 	control.activate_offboard_control_mode(true);
 
+	sleep(1);
+
 	PX4_INFO("Set position 1");
-	control.set_position(1,1,1);
+	control.set_position(control.initial_position.x, control.initial_position.y, control.initial_position.z - 1.0);
+
+	control.get_local_position();
+
+	PX4_INFO("Delay 5 seconds");
+	sleep(5);
+	
+	PX4_INFO("Set position 2");
+	control.set_position(control.initial_position.x, control.initial_position.y, control.initial_position.z - 2.0);
+
+	control.get_local_position();
 
 	PX4_INFO("Delay 5 seconds");
 	sleep(5);
 
-	PX4_INFO("Set position 2");
-	control.set_position(5,5,5);
+	PX4_INFO("Set position 3");
+	control.set_position(control.initial_position.x, control.initial_position.y, control.initial_position.z);
+
+	PX4_INFO("Delay 5 seconds");
+	sleep(5);
+
+	PX4_INFO("Disabling offboard control mode");
+	control.activate_offboard_control_mode(false);	
+
+	control.get_local_position();
 
 	return 1;
 	}
