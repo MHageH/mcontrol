@@ -69,6 +69,9 @@ the application to crash)
 
 # TODO 
 - Add automatic arm/disarm
+- Add pthread join in thread_layer destructor to liberate memory
+- Add daemon control features (start, stop, status..)
+- Eliminate possible memory corruptions
 
 ## Notes
 - Disabling the -Werror=double-promotion flag in cmake/common/px4_base.cmake file might be necessary for now
